@@ -1,129 +1,82 @@
-![Swift](https://img.shields.io/badge/Swift-4.2-orange.svg)
-[![Carthage Compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
-![Platform](https://img.shields.io/badge/Platform-iOS-red.svg)
+# SwiftScanKit
 
-# SwiftScan
+**English** · [简体中文](README.zh-CN.md)
 
-## 主要内容的介绍
+Native QR and barcode scanning and image generation for iOS, with no third-party runtime dependencies.
 
-* `生成二维码/条形码`<br>
+## Features
 
-* `扫描二维码/条形码`<br>
+- Scan QR codes and barcodes with a ready-to-use UIKit controller.
+- Choose framed or full-screen scanning with line or grid animations.
+- Customize colors, hints and supported code types; use the low-light torch control.
+- Generate QR codes with optional logos and Code 128 images.
 
-* `根据光线强弱开启手电筒`<br>
-
-* `扫描成功之后界面之间逻辑跳转处理`<br>
-
-* `扫描界面可自定义（线扫描条样式以及网格样式）`<br>
-
-* `扫描界面仿微信、支付宝（请根据项目需求，自行布局或调整）`<br>
-
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Usage](#usage)
-
-
-## Requirements
-
-- Swift 4.2
-- iOS 9.0.0+
-- Xcode 9.x
-
-<br>
+**Requirements:** iOS 15+ · Swift 6.4 · Xcode 27.1+
 
 ## Installation
 
-### Carthage
+### Swift Package Manager
 
-[Carthage](https://github.com/Carthage/Carthage) is a decentralized dependency manager that builds your dependencies and provides you with binary frameworks.
+Add the package in Xcode and select the **SwiftScanKit** product, or declare:
 
-To integrate **SwiftScan** into your Xcode project using Carthage, specify it in your `Cartfile`:
-
-```ogdl
-github "chenjie1219/SwiftScan"
+```swift
+.package(url: "https://github.com/chenjie1219/SwiftScanKit.git", from: "2.0.0")
 ```
 
-Run `carthage update` to build the framework and drag the built `SwiftScanner.framework` into your Xcode project.
+### CocoaPods
 
-### Manually
+```ruby
+pod 'SwiftScanKit', '~> 2.0'
+```
 
-Just download the project, and drag and drop the "SwiftScanner" folder in your project.
+Run `pod install` and open the generated `.xcworkspace`. Both options use `import SwiftScanKit`.
 
-<br>
+## Camera permission
 
-## Usage
+Add a camera usage description to your app’s `Info.plist`. Scanning requires a physical device.
 
-#### 1、在 info.plist 中添加以下字段（iOS 10 之后需添加的字段）
+```xml
+<key>NSCameraUsageDescription</key>
+<string>Use the camera to scan QR codes and barcodes.</string>
+```
 
-* `NSCameraUsageDescription (相机权限访问)`<br>
+## Scanning
 
-#### 2、二维码扫描
+From a view controller with a navigation controller:
 
-##### Push方式弹出扫描页面
+```swift
+import UIKit
+import SwiftScanKit
 
-```Swift
-/// 创建二维码扫描
-let vc = ScannerVC() 
-
-//设置标题、颜色、扫描样式（线条、网格）、提示文字
-vc.setupScanner("微信扫一扫", .green, .default, "将二维码/条码放入框内，即可自动扫描") { (code) in
-//扫描回调方法
-<#code#>
-
-//关闭扫描页面
-self.navigationController?.popViewController(animated: true)
+let scanner = ScannerVC()
+scanner.title = "Scan"
+scanner.onScan = { [weak self] code in
+    print(code)
+    self?.navigationController?.popViewController(animated: true)
 }
-
-//push到扫描页面
-navigationController?.pushViewController(vc, animated: true)
-```
-##### Present方式弹出扫描页面
-
-```Swift
-/// 创建二维码扫描
-let vc = ScannerVC() 
-
-//设置标题、颜色、扫描样式（线条、网格）、提示文字
-vc.setupScanner("支付宝扫一扫", .blue, .grid, "放入框内，自动扫描") { (code) in
-//扫描回调方法
-<#code#>
-
-//关闭扫描页面
-self.dismiss(animated: true, completion: nil)
+scanner.onError = { error in
+    print(error.localizedDescription)
 }
-
-//Present到扫描页面
-present(vc, animated: true, completion: nil)
+navigationController?.pushViewController(scanner, animated: true)
 ```
 
-#### 3、二维码生成
+Use `scanner.scanRegion = .fullScreen` for full-screen scanning, or keep the default framed region. Set `scanner.animationStyle = .grid` for the grid animation.
 
-```Swift
-/// 带 logo 的二维码（logoImage为nil则不带logo）
-QRCodeView.image = UIImage.generateQRCode("https://github.com/chenjie1219", 300, logoImage, .orange)
+Each scan returns one result and stops. To scan again on the same screen, call `scanner.restartScanning()`.
+
+## Image generation
+
+```swift
+let qr = UIImage.generateQRCode("https://example.com", 900)
+let barcode = UIImage.generateCode128("123456789", CGSize(width: 900, height: 300))
 ```
 
-#### 4、条形码生成
+Dimensions are output pixels. Both methods return an optional `UIImage`.
 
-```Swift
-/// 条形码
-barCodeView.image = UIImage.generateCode128("https://github.com/chenjie1219", CGSize(width: 300, height: 100, .blue)
-```
+## Demo
 
+Open `SwiftScanKit.xcodeproj` and run the **SwiftScanKitDemo** scheme to try scanning styles and image generation.
 
-## 效果图
-![1](Assets/1.PNG)
-![2](Assets/2.PNG)
-![3](Assets/3.PNG)
-![4](Assets/4.PNG)
-![5](Assets/5.PNG)
-![6](Assets/6.PNG)
-![7](Assets/7.PNG)
-![8](Assets/8.PNG)
+## License
 
-
-## Author
-
-* Email:4234115@qq.com
-
-* Wechat:4234115
+[MIT](LICENSE)
